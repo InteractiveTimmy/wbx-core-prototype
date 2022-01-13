@@ -24,6 +24,7 @@ module.exports = {
     'eslint-plugin-tsdoc',
   ],
   rules: {
+    'jest/prefer-lowercase-title': 'off',
     'import/extensions': [
       'error',
       'ignorePackages',
