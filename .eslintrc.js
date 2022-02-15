@@ -24,6 +24,7 @@ module.exports = {
     'eslint-plugin-tsdoc',
   ],
   rules: {
+    'function-paren-newline': 'off',
     'jest/prefer-lowercase-title': 'off',
     'import/extensions': [
       'error',
@@ -53,7 +54,9 @@ module.exports = {
     'jsdoc/require-throws': 'warn',
     'jsdoc/require-yields': 'warn',
     'jsdoc/require-yields-check': 'warn',
+    'object-curly-newline': 'off',
     'tsdoc/syntax': 'warn',
+    '@typescript-eslint/no-empty-interface': 'off',
   },
   settings: {
     jsdoc: {
