@@ -8,5 +8,10 @@
   },
   "files": {
     "eol": "\n"
+  },
+  "typescript": {
+    "preferences": {
+      "quoteStyle": "single"
+    }
   }
 }
