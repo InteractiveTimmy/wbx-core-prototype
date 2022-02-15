@@ -1,3 +1,8 @@
+import { ServicesRegistry } from '../../registries';
+import Request from '../Request';
+
+import { WebexCoreRegistries, WebexCoreSerial } from './WebexCore.types';
+
 /**
  * WebexCore primary package model. This model reflects the entry point for this package.
  *
@@ -7,7 +12,7 @@ class WebexCore {
   /**
    * HTTP request tooling.
    */
-  public http: unknown;
+  public request: Request;
 
   /**
    * Logging tooling.
@@ -15,9 +20,9 @@ class WebexCore {
   public logger: unknown;
 
   /**
-   * Serializable registry managers.
+   * Serializable registry data sets.
    */
-  public registry: Record<string, unknown>;
+  public registries: WebexCoreRegistries;
 
   /**
    * Web Socket tooling.
@@ -30,9 +35,13 @@ class WebexCore {
    * @param serial - Serialized WebexCore instance.
    */
   public constructor(serial?: unknown) {
+    this.registries = {};
+
     if (serial) {
       this.deserialize(serial);
     }
+
+    this.request = new Request();
   }
 
   /**
@@ -41,9 +50,14 @@ class WebexCore {
    * @param serial - Serial to use when mapping this WebexCore instance.
    * @returns - This WebexCore instance.
    */
-  public deserialize(serial: unknown): this {
-    this.registry = { serial };
+  public deserialize(serial: WebexCoreSerial): this {
+    this.registries.services = new ServicesRegistry(serial?.registries?.services);
+
     return this;
+  }
+
+  public destroy(): void {
+    this.registries?.services?.destroy();
   }
 
   /**
@@ -60,8 +74,12 @@ class WebexCore {
    *
    * @returns - Serial of this WebexCore instance.
    */
-  public serialize(): unknown {
-    return this.registry.serial;
+  public serialize(): WebexCoreSerial {
+    return {
+      registries: {
+        services: this.registries.services.serialize(),
+      },
+    };
   }
 }
 

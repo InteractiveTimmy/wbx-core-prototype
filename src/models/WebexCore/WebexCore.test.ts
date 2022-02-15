@@ -1,3 +1,7 @@
+import {
+  ServicesRegistrySerialFixture,
+} from '../../registries/ServicesRegistry/ServicesRegistry.fixtures';
+
 import WebexCore from './WebexCore';
 
 describe('WebexCore', () => {
@@ -13,11 +17,15 @@ describe('WebexCore', () => {
     it('should attempt to deserialize a serial', () => {
       expect.assertions(1);
 
-      const serial = { key: 'value' };
+      const serial = {
+        registries: {
+          services: ServicesRegistrySerialFixture,
+        },
+      };
 
       const webexCore = new WebexCore(serial);
 
-      expect(webexCore.registry.serial).toMatchObject(serial);
+      expect(webexCore.serialize()).toMatchObject(serial);
     });
   });
 
@@ -25,13 +33,18 @@ describe('WebexCore', () => {
     it('should deserialize a provided serial into this object', () => {
       expect.assertions(1);
 
-      const serial = { key: 'value' };
+      const serial = {
+        registries: {
+          services: ServicesRegistrySerialFixture,
+        },
+      };
 
       const webexCore = new WebexCore();
 
       webexCore.deserialize(serial);
 
-      expect(webexCore.registry.serial).toMatchObject(serial);
+      expect(webexCore.registries.services.serialize())
+        .toMatchObject(serial.registries.services);
     });
   });
 
@@ -51,13 +64,17 @@ describe('WebexCore', () => {
     it('should serialize this object', async () => {
       expect.assertions(1);
 
-      const serial = { key: 'value' };
+      const serial = {
+        registries: {
+          services: ServicesRegistrySerialFixture,
+        },
+      };
 
       const webexCore = new WebexCore(serial);
 
       const response = await webexCore.serialize();
 
-      expect(response).toBe(serial);
+      expect(response).toMatchObject(serial);
     });
   });
 });
