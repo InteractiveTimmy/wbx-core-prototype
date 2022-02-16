@@ -26,6 +26,7 @@ module.exports = {
   rules: {
     'function-paren-newline': 'off',
     'jest/prefer-lowercase-title': 'off',
+    'jest/require-hook': 'off',
     'import/extensions': [
       'error',
       'ignorePackages',

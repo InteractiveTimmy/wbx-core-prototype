@@ -1,5 +1,4 @@
 import { ServicesRegistry } from '../../registries';
-import Request from '../Request';
 
 import { WebexCoreRegistries, WebexCoreSerial } from './WebexCore.types';
 
@@ -12,7 +11,7 @@ class WebexCore {
   /**
    * HTTP request tooling.
    */
-  public request: Request;
+  public request: unknown;
 
   /**
    * Logging tooling.
@@ -40,8 +39,6 @@ class WebexCore {
     if (serial) {
       this.deserialize(serial);
     }
-
-    this.request = new Request();
   }
 
   /**
