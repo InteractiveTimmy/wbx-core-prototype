@@ -7,6 +7,7 @@ export default [
     input: 'dist/loose/index.js',
     output: [
       {
+        exports: 'auto',
         format: 'cjs',
         file: 'dist/cjs/index.js',
       },
