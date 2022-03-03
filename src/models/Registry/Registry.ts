@@ -1,23 +1,20 @@
-/**
- * The Registry model's abstract class.
- *
- * @remarks
- * This is the core shape of any object that is designed to manage data within `@webex/core`.
- *
- * @internal
- */
-abstract class Registry<Item extends Record<string, unknown> = Record<string, unknown>> {
-  /**
-   * Nested data Object for storing all Item Objects within the scope of this Registry.
-   */
-  protected data: Array<Item>;
+import RegistryItem, { RegistryItemData, RegistryItemImmutable, RegistryItemSerial } from '../RegistryItem';
 
-  /**
-   * Construct a new Registry instance.
-   *
-   * @param serial - Serial to construct this Registry instance from.
-   */
-  constructor(serial?: Array<Item>) {
+class Registry<
+  ItemData extends RegistryItemData = RegistryItemData,
+  ItemImmutable extends RegistryItemImmutable = RegistryItemImmutable,
+  ItemSerial extends RegistryItemSerial = RegistryItemSerial
+> {
+  protected data: Array<RegistryItem<ItemData, ItemImmutable, ItemSerial>>;
+
+  protected Item: new (itemSerial: ItemSerial) => RegistryItem<ItemData, ItemImmutable, ItemSerial>;
+
+  constructor(
+    item: new (itemSerial: ItemSerial) => RegistryItem<ItemData, ItemImmutable, ItemSerial>,
+    serial?: Array<ItemSerial>,
+  ) {
+    this.Item = item;
+
     this.initialize();
 
     if (serial) {
@@ -25,142 +22,114 @@ abstract class Registry<Item extends Record<string, unknown> = Record<string, un
     }
   }
 
-  /**
-   * Name of this Registry.
-   *
-   * @returns - The name of this Registry.
-   */
   public get name(): string {
     return this.constructor.name;
   }
 
-  /**
-   * Deserialize a Serial into this Registry instance.
-   *
-   * @param serial - Serial to mount to this Registry instance.
-   * @returns - This Registry instance.
-   * @internal
-   */
-  protected deserialize(serial: Array<Item>): this {
-    if (!Array.isArray(this.data) || this.data.length > 0) {
-      return this;
-    }
-
-    this.data = [...serial];
-
-    return this;
+  protected getItem(query: Partial<ItemImmutable>): RegistryItem<
+    ItemData, ItemImmutable, ItemSerial
+  > {
+    return this.data.find(
+      (item): boolean => Object.keys(query).every(
+        (key): boolean => query[key] === item.immute()[key],
+      ),
+    );
   }
 
-  /**
-   * Initialize the data containers on this Registry instance.
-   *
-   * @returns - This Registry instance.
-   * @internal
-   */
+  protected listItems(query: Partial<ItemImmutable>): Array<RegistryItem<
+    ItemData, ItemImmutable, ItemSerial
+  >> {
+    return this.data.filter(
+      (item): boolean => Object.keys(query).every(
+        (key): boolean => query[key] === item.immute()[key],
+      ),
+    );
+  }
+
   protected initialize(): this {
     this.data = [];
 
     return this;
   }
 
-  /**
-   * Mount an Item on this Registry instance.
-   *
-   * @param item - Item to mount to this Registry instance.
-   * @returns - This Registry instance.
-   */
-  public create(item: Item): this {
-    const storedItem = this.get(item as Partial<Item>);
-
-    if (storedItem) {
+  public deserialize(serial: Array<ItemSerial>): this {
+    if (!Array.isArray(this.data) || this.data.length > 0) {
       return this;
     }
 
-    this.data.push({ ...item });
+    this.data = serial.map((itemSerial: ItemSerial) => new this.Item(itemSerial));
 
     return this;
   }
 
-  /**
-   * Destroy all stored data on this Registry instance.
-   *
-   * @remarks
-   * Note that this does not fully destroy the Registry instance, but instead clears all data
-   * references mounted to it.
-   */
   public destroy(): void {
     this.data.length = 0;
   }
 
-  /**
-   * Get the first Item that matches the provided Query object stored in this Registry instance.
-   *
-   * @param query - Partial Item Object to query against the stored data.
-   * @returns - The found Registry Item.
-   */
-  public get(query: Partial<Item>): Item {
-    const item = this.data.find(
-      (storedItem: Item): boolean => Object.entries(query).some(
-        ([key, value]: [string, unknown]): boolean => storedItem[key] === value,
-      ),
-    );
-
-    return item ? { ...item } : undefined;
+  public get(query: Partial<ItemImmutable>): ItemImmutable {
+    return this.getItem(query).immute();
   }
 
-  /**
-   * Remove the first Item that matches the provided Query object stored in this Registry instance.
-   *
-   * @param query - Partial Item Object to query against the stored data.
-   * @returns - This Registry instance.
-   */
-  public remove(query: Partial<Item>): this {
-    const item = this.data.find(
-      (storedItem: Item): boolean => Object.entries(query).some(
-        ([key, value]: [string, unknown]): boolean => storedItem[key] === value,
-      ),
+  public list(query: Partial<ItemImmutable>): Array<ItemImmutable> {
+    return this.listItems(query).map(
+      (item): ItemImmutable => item.immute(),
     );
+  }
 
-    if (item) {
-      this.data.splice(this.data.indexOf(item), 1);
+  public load(itemSerials: Array<ItemSerial>): Array<ItemImmutable> {
+    return itemSerials.map(
+      (itemSerial): ItemImmutable => this.mount(itemSerial),
+    );
+  }
+
+  public mount(itemSerial: ItemSerial): ItemImmutable {
+    const storedItem = this.get(itemSerial as Partial<ItemImmutable>);
+
+    if (storedItem) {
+      return storedItem.immute();
     }
 
-    return this;
+    const newItem = new this.Item({ ...itemSerial });
+
+    this.data.push(newItem);
+
+    return newItem.immute();
   }
 
-  /**
-   * Serialize this Registry instance for transport to an external medium.
-   *
-   * @remarks
-   * Serialized Registry instances are used for transport to different mediums.
-   *
-   * @returns - This Registry instance serialized.
-   */
-  public serialize(): Array<Item> {
-    return [
-      ...this.data.map((item: Item): Item => ({ ...item })),
-    ];
+  public serialize(): Array<ItemSerial> {
+    return this.data.map(
+      (item): ItemSerial => item.serialize(),
+    );
   }
 
-  /**
-   * Update an existing Item within this Registry instance.
-   *
-   * @param query - Object to query against the stored data.
-   * @param item - New Item to replace the found Item with.
-   * @returns - This Registry instance.
-   */
-  public update(query: Partial<Item>, item: Item): this {
-    const storedItem = this.get(query);
+  public unload(queries: Array<Partial<ItemImmutable>>): Array<ItemSerial> {
+    return queries.map(
+      (query): ItemSerial => this.unmount(query),
+    );
+  }
+
+  public unmount(query: Partial<ItemImmutable>): ItemSerial {
+    const storedItem = this.getItem(query);
 
     if (!storedItem) {
-      return this;
+      return undefined;
     }
 
-    this.remove(query);
+    this.data.splice(this.data.indexOf(storedItem), 1);
 
-    this.create(item);
+    return storedItem.serialize();
+  }
 
-    return this;
+  public update(query: Partial<ItemImmutable>, serial: ItemSerial): ItemImmutable {
+    const storedItem = this.getItem(query);
+
+    if (!storedItem) {
+      return undefined;
+    }
+
+    storedItem.deserialize(serial);
+
+    return storedItem.immute();
   }
 }
 
