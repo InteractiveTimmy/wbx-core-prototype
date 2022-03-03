@@ -1,7 +1,10 @@
-import ServicesRegistry from './ServicesRegistry';
+import Host from './Host';
+import Service from './Service';
 
-export type { ServicesRegistryItem, ServicesRegistrySerial } from './ServicesRegistry';
+export type { HostData, HostImmutable, HostSerial } from './Host';
+export type { ServiceData, ServiceImmutable, ServiceSerial } from './Service';
 
 export {
-  ServicesRegistry,
+  Host,
+  Service,
 };
