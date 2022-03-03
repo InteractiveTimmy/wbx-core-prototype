@@ -1,12 +1,34 @@
-import {
+import Webex from './Webex';
+
+export {
+  Registry,
+  RegistryItem,
   WebexCore,
-  WebexCoreRegistries,
-  WebexCoreSerial,
 } from './models';
 
 export type {
-  WebexCoreRegistries,
-  WebexCoreSerial,
-};
+  RegistryItemData,
+  RegistryItemImmutable,
+  RegistryItemSerial,
+} from './models';
 
-export default WebexCore;
+export {
+  Host,
+  Service,
+} from './registries';
+
+export type {
+  HostData,
+  HostImmutable,
+  HostSerial,
+  ServiceData,
+  ServiceImmutable,
+  ServiceSerial,
+} from './registries';
+
+export type {
+  WebexRegistriesSerial,
+  WebexSerial,
+} from './Webex';
+
+export { Webex };
