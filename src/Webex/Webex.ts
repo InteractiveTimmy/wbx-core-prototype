@@ -10,8 +10,8 @@ class Webex extends WebexCore<WebexSerial> {
   public deserialize(serial: WebexSerial): this {
     this.registries = {};
 
-    this.registries.hosts = new Registry(Host, serial?.registries?.hosts);
-    this.registries.services = new Registry(Service, serial?.registries?.services);
+    this.registries.hosts = new Registry(Host, 'hosts', serial?.registries?.hosts);
+    this.registries.services = new Registry(Service, 'services', serial?.registries?.services);
 
     return this;
   }
@@ -29,7 +29,7 @@ class Webex extends WebexCore<WebexSerial> {
 
         mutable[registry.name] = registry.serialize();
 
-        return collection;
+        return mutable;
       }, {},
     );
 

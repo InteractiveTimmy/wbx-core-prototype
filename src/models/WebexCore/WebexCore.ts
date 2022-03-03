@@ -10,9 +10,7 @@ abstract class WebexCore<Serial> {
    * @param serial - Serialized WebexCore instance.
    */
   public constructor(serial?: Serial) {
-    if (serial) {
-      this.deserialize(serial);
-    }
+    this.deserialize(serial);
   }
 
   public abstract deserialize(serial: Serial): this;

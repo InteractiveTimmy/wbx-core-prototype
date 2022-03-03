@@ -9,21 +9,21 @@ class Registry<
 
   protected Item: new (itemSerial: ItemSerial) => RegistryItem<ItemData, ItemImmutable, ItemSerial>;
 
+  public readonly name: string;
+
   constructor(
     item: new (itemSerial: ItemSerial) => RegistryItem<ItemData, ItemImmutable, ItemSerial>,
+    name: string,
     serial?: Array<ItemSerial>,
   ) {
     this.Item = item;
+    this.name = name;
 
     this.initialize();
 
     if (serial) {
       this.deserialize(serial);
     }
-  }
-
-  public get name(): string {
-    return this.constructor.name;
   }
 
   protected getItem(query: Partial<ItemImmutable>): RegistryItem<
@@ -83,7 +83,7 @@ class Registry<
   }
 
   public mount(itemSerial: ItemSerial): ItemImmutable {
-    const storedItem = this.get(itemSerial as Partial<ItemImmutable>);
+    const storedItem = this.getItem(itemSerial as Partial<ItemImmutable>);
 
     if (storedItem) {
       return storedItem.immute();
