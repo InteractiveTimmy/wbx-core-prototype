@@ -1,9 +1,11 @@
 import Registry from './Registry';
-import WebexCore from './WebexCore/WebexCore';
+import RegistryItem from './RegistryItem';
+import WebexCore from './WebexCore';
 
-export type { WebexCoreRegistries, WebexCoreSerial } from './WebexCore';
+export type { RegistryItemData, RegistryItemImmutable, RegistryItemSerial } from './RegistryItem';
 
 export {
   Registry,
+  RegistryItem,
   WebexCore,
 };
